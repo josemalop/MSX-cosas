@@ -1,29 +1,45 @@
 <#
 .SYNOPSIS
-=========================================================================================
-Particionador tarjetas SD para OneChipMSX y OneChipBook.
-Creado por Josema el 04/10/2026.
-=========================================================================================
-Versión 0.1. Creación del script.
-Versión 0.2. Se implementa control de errores, protección para no formatear algo que sea del sistema y valores por defecto.
-=========================================================================================
+    Particionador y formateador interactivo de tarjetas SD (FAT16, 64 KB) para OneChipMSX, OneChipBook y Nextor/MSX.
 
-Históricamente mucha gente tiene problemas para particionar y formatear una tarjeta SD de más de 4GB para el chinobuk, por ese motivo y por comodidad mía, he hecho un script en powershell que soluciona todo eso en Windows 11. 
+.DESCRIPTION
+    =========================================================================================
+    Particionador de tarjetas SD para OneChipMSX y OneChipBook.
+    Creado por Josema el 04/10/2026.
+    =========================================================================================
+    Versión 0.1: Creación inicial del script.
+    Versión 0.2: Control exhaustivo de errores, protección de discos de sistema/arranque,
+                 interactividad en tamaños (32-4095 MB), valores por defecto [S/Enter] y
+                 ajuste automático del espacio remanente respetando el límite de 4 particiones MBR.
+    =========================================================================================
 
-El script hay que ejecutarlo como administrador, ya que accede a la herramienta diskpart.
+    Históricamente mucha gente tiene problemas para particionar y formatear en FAT16 con clústeres 
+    de 64 KB tarjetas SD de más de 4 GB para el chinobuk (OneChipBook) y OCM. Windows no permite 
+    hacerlo fácilmente desde la interfaz gráfica. Por ese motivo, y por comodidad mía, he creado 
+    este script en PowerShell que automatiza todo el proceso de forma segura.
 
-* Muestra los discos que hay en el sistema para que elijamos donde se crearán las particiones. Si seleccionamos un disco que sea del sistema, muestra un mensaje y no hace nada.
-* Cuando seleccionamos un disco válido, muestra el estado inicial de las particiones del mismo.
-* Detecta el espacio libre y, si hay suficiente, pregunta el tamaño de la partición (entre 32MB y 4095MB) y después pregunta el  nombre de la partición a crear.
-* Crea una partición de 4095MB, vuelve a detectar el espacio libre y sigue haciendo esto hasta que no quede espacio en la tarjeta o haya un total de 4 particiones primarias.
-* Muestra el estado final de las particiones en la tarjeta SD.
+    El script debe ejecutarse como Administrador (requiere acceso a DiskPart y cmdlets de almacenamiento).
 
-En mi caso, en una tarjeta de 16GB, creé una partición con el script new-sdcard.cmd del OCM-SDBIOS Pack, después el script me creó 2 particiones de 4095MB y una con el resto que quedaba en la tarjeta.
+    Flujo y características:
+    * Muestra los discos del sistema para elegir la unidad. Si seleccionas el disco de sistema o arranque, 
+      te avisa en rojo y te permite volver a elegir sin cerrar el script.
+    * Muestra la estructura de particiones actual del disco seleccionado (número, letra, etiqueta y tamaño).
+    * Permite conservar las particiones existentes (lo habitual si ya cremos la partición de arranque con OCM-SDBIOS Pack).
+    * Detecta el espacio libre utilizable real y permite definir interactivamente el tamaño de cada partición 
+      (entre 32 MB y 4095 MB, sugiriendo el máximo posible por defecto al pulsar Enter).
+    * Solicita una etiqueta para cada partición (saneada automáticamente a 11 caracteres y mayúsculas).
+    * Aplica formato FAT16 con clústeres de 64 KB (unit=64k) y asigna letra de unidad al vuelo.
+    * Respeta estrictamente el tope físico de 4 particiones primarias MBR y permite detenerse en cualquier momento.
+    * Al finalizar, muestra una tabla resumen limpia con todas las particiones resultantes.
 
-Sentíos libres de añadir/modificar/mejorar lo que sea del script. Es la primera versión y, aunque a mi me funciona, fijo que tiene algún fallo.
+    Ejemplo de uso:
+    En una tarjeta de 16 GB, tras crear la primera partición con el script new-sdcard.cmd del 
+    OCM-SDBIOS Pack, este script permite añadir las 3 particiones restantes (por ejemplo, dos de 4095 MB 
+    y la última aprovechando exactamente todo el espacio restante disponible).
 
-¡Disfrutadlo!
-
+.NOTES
+    Sentíos libres de añadir, modificar o mejorar lo que consideréis. Es un script hecho por y para 
+    la comunidad MSX. ¡Disfrutadlo!
 #>
 
 function Test-Admin {
