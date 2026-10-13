@@ -22,4 +22,5 @@ Ejemplo de uso:
 En una tarjeta de 16 GB con una partición ya creada con el script new-sdcard.cmd del OCM-SDBIOS Pack, este script permite crear un máximo de 3 particiones adicionales (en este caso dos de 4095 MB y la última de 2000 y pico MB aprovechando exactamente todo el espacio restante disponible).
 
 Sentíos libres de añadir, modificar o mejorar lo que consideréis. Es un script hecho por y para la comunidad MSX. ¡Disfrutadlo!
+
 ---
