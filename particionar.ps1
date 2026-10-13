@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Particionador y formateador interactivo de tarjetas SD (FAT16, 64 KB) para OneChipMSX, OneChipBook y Nextor/MSX.
+    Particionador de tarjetas SD para OneChipMSX y OneChipBook.
 
 .DESCRIPTION
     =========================================================================================
@@ -8,38 +8,28 @@
     Creado por Josema el 04/10/2026.
     =========================================================================================
     Versión 0.1: Creación inicial del script.
-    Versión 0.2: Control exhaustivo de errores, protección de discos de sistema/arranque,
-                 interactividad en tamaños (32-4095 MB), valores por defecto [S/Enter] y
-                 ajuste automático del espacio remanente respetando el límite de 4 particiones MBR.
+    Versión 0.2: Control exhaustivo de errores, protección de discos de sistema/arranque, interactividad en tamaños (32-4095 MB), valores por defecto [S/Enter] y ajuste automático del espacio remanente respetando el límite de 4 particiones MBR.
     =========================================================================================
 
-    Históricamente mucha gente tiene problemas para particionar y formatear en FAT16 con clústeres 
-    de 64 KB tarjetas SD de más de 4 GB para el chinobuk (OneChipBook) y OCM. Windows no permite 
-    hacerlo fácilmente desde la interfaz gráfica. Por ese motivo, y por comodidad mía, he creado 
-    este script en PowerShell que automatiza todo el proceso de forma segura.
+    Históricamente mucha gente tiene problemas para particionar y formatear en FAT16 con clústeres de 64 KB tarjetas SD de más de 4 GB para el OneChipMSX y el OneChipBook. Windows no permite hacerlo desde la interfaz gráfica, teniendo que hacerlo con los comandos esotéricos de diskpart. Por ese motivo (y por comodidad mía, que narices) he creado este script en PowerShell que automatiza todo el proceso de forma segura.
 
-    El script debe ejecutarse como Administrador (requiere acceso a DiskPart y cmdlets de almacenamiento).
+    IMPORTANTE: El script debe ejecutarse con usuario *Administrador*.
 
     Flujo y características:
-    * Muestra los discos del sistema para elegir la unidad. Si seleccionas el disco de sistema o arranque, 
-      te avisa en rojo y te permite volver a elegir sin cerrar el script.
+    * Muestra los discos del sistema para elegir la unidad. Si seleccionas un disco de sistema o arranque, te avisa en rojo y te permite volver a elegir sin cerrar el script.
     * Muestra la estructura de particiones actual del disco seleccionado (número, letra, etiqueta y tamaño).
-    * Permite conservar las particiones existentes (lo habitual si ya cremos la partición de arranque con OCM-SDBIOS Pack).
-    * Detecta el espacio libre utilizable real y permite definir interactivamente el tamaño de cada partición 
-      (entre 32 MB y 4095 MB, sugiriendo el máximo posible por defecto al pulsar Enter).
+    * Permite conservar las particiones existentes (lo habitual si ya creamos anteriormente la partición de arranque con OCM-SDBIOS Pack).
+    * Detecta el espacio libre utilizable real y permite definir interactivamente el tamaño de cada partición (entre 32 MB y 4095 MB, sugiriendo el máximo posible por defecto al pulsar Enter).
     * Solicita una etiqueta para cada partición (saneada automáticamente a 11 caracteres y mayúsculas).
-    * Aplica formato FAT16 con clústeres de 64 KB (unit=64k) y asigna letra de unidad al vuelo.
+    * Aplica formato FAT16 con clústeres de 64 KB y asigna una letra de unidad al vuelo por si quieres copiar cosillas en la SD antes de conectarla a tu OCM.
     * Respeta estrictamente el tope físico de 4 particiones primarias MBR y permite detenerse en cualquier momento.
     * Al finalizar, muestra una tabla resumen limpia con todas las particiones resultantes.
 
     Ejemplo de uso:
-    En una tarjeta de 16 GB, tras crear la primera partición con el script new-sdcard.cmd del 
-    OCM-SDBIOS Pack, este script permite añadir las 3 particiones restantes (por ejemplo, dos de 4095 MB 
-    y la última aprovechando exactamente todo el espacio restante disponible).
+    En una tarjeta de 16 GB con una partición ya creada con el script new-sdcard.cmd del OCM-SDBIOS Pack, este script permite crear un máximo de 3 particiones adicionales (en este caso dos de 4095 MB y la última de 2000 y pico MB aprovechando exactamente todo el espacio restante disponible).
 
 .NOTES
-    Sentíos libres de añadir, modificar o mejorar lo que consideréis. Es un script hecho por y para 
-    la comunidad MSX. ¡Disfrutadlo!
+    Sentíos libres de añadir, modificar o mejorar lo que consideréis. Es un script hecho por y para la comunidad MSX. ¡Disfrutadlo!
 #>
 
 function Test-Admin {
